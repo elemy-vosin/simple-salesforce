@@ -257,3 +257,36 @@ class TestSalesforceLogin(unittest.TestCase):
                 consumer_secret='12345.abcde'
                 )
         self.assertTrue(self.mockrequest.post.called)
+
+    @responses.activate
+    def test_connected_app_refresh_token_login_success(self):
+        """Test a successful connected app login with a refresh token"""
+        login_args = {
+            'password': 'password',
+            'consumer_key': '12345.abcde',
+            'consumer_secret': '12345.abcde',
+            'refresh_token': '12345.abcde'
+            }
+        self._test_login_success(
+            re.compile(r'^https://login.salesforce.com/.*$'), login_args,
+            response_body=tests.TOKEN_LOGIN_RESPONSE_SUCCESS)
+
+    def test_connected_app_refresh_token_login_failure(self):
+        """Test a failed connected app login with refresh token"""
+        return_mock = Mock()
+        return_mock.status_code = 400
+        # pylint: disable=line-too-long
+        return_mock.content = '{"error": "invalid_client_id", ' \
+                              '"error_description": "client identifier ' \
+                              'invalid"}'
+        self.mockrequest.post.return_value = return_mock
+
+        with self.assertRaises(SalesforceAuthenticationFailed):
+            SalesforceLogin(
+                username='myemail@example.com.sandbox',
+                password='password',
+                consumer_key='12345.abcde',
+                consumer_secret='12345.abcde',
+                refresh_token='12345.abcde'
+                )
+        self.assertTrue(self.mockrequest.post.called)

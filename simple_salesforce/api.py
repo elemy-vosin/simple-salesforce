@@ -56,6 +56,7 @@ class Salesforce:
             privatekey=None,
             parse_float=None,
             object_pairs_hook=OrderedDict,
+            refresh_token=None,
             ):
 
         """Initialize the instance with the given parameters.
@@ -183,7 +184,10 @@ class Salesforce:
 
         elif all(arg is not None for arg in (
                 username, password, consumer_key, consumer_secret)):
-            self.auth_type = "password"
+            if refresh_token:
+                self.auth_type = "refresh_token"    
+            else:
+                self.auth_type = "password"
 
             # Pass along the username/password to our login helper
             self._salesforce_login_partial = partial(
@@ -194,7 +198,8 @@ class Salesforce:
                 consumer_key=consumer_key,
                 consumer_secret=consumer_secret,
                 proxies=self.proxies,
-                domain=self.domain)
+                domain=self.domain,
+                refresh_token=refresh_token)
             self._refresh_session()
 
         elif all(arg is not None for arg in (

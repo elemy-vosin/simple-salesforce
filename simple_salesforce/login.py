@@ -34,6 +34,7 @@ def SalesforceLogin(
         consumer_secret=None,
         privatekey_file=None,
         privatekey=None,
+        refresh_token=None,
         ):
     """Return a tuple of `(session_id, sf_instance)` where `session_id` is the
     session ID to use for authentication to Salesforce and `sf_instance` is
@@ -118,6 +119,9 @@ def SalesforceLogin(
             'username': unescape(username),
             'password': unescape(password) if password else None
             }
+        if refresh_token:
+            token_data['grant_type'] = 'refresh_token'
+            token_data['refresh_token'] = refresh_token
         return token_login(
             f'https://{domain}.salesforce.com/services/oauth2/token',
             token_data, domain, consumer_key,
